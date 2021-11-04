@@ -352,13 +352,15 @@ func (f *File) SetCellStr(sheet, axis, value string) error {
 
 // setCellString provides a function to set string type to shared string
 // table.
-func (f *File) setCellString(value string) (t string, v string) {
+func (f *File) setCellString(value string) (string, string) {
 	if len(value) > TotalCellChars {
 		value = value[0:TotalCellChars]
 	}
-	t = "s"
-	v = strconv.Itoa(f.setSharedString(value))
-	return
+	if f.options.DisableSharedStringsTable {
+		t, v, _ := setCellStr(value)
+		return t, v
+	}
+	return "s", strconv.Itoa(f.setSharedString(value))
 }
 
 // setSharedString provides a function to add string to the share string table.
