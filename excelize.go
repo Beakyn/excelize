@@ -75,10 +75,11 @@ type charsetTranscoderFn func(charset string, input io.Reader) (rdr io.Reader, e
 // the file size is over this value, this value should be less than or equal
 // to UnzipSizeLimit, the default value is 16MB.
 type Options struct {
-	Password               string
-	RawCellValue           bool
-	UnzipSizeLimit         int64
-	WorksheetUnzipMemLimit int64
+	DisableSharedStringsTable bool
+	Password                  string
+	RawCellValue              bool
+	UnzipSizeLimit            int64
+	WorksheetUnzipMemLimit    int64
 }
 
 // OpenFile take the name of an spreadsheet file and returns a populated
