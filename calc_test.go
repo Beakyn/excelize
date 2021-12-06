@@ -777,6 +777,10 @@ func TestCalcCellValue(t *testing.T) {
 		// CHIDIST
 		"=CHIDIST(0.5,3)": "0.918891411654676",
 		"=CHIDIST(8,3)":   "0.0460117056892315",
+		// CONFIDENCE
+		"=CONFIDENCE(0.05,0.07,100)": "0.0137197479028414",
+		// CONFIDENCE.NORM
+		"=CONFIDENCE.NORM(0.05,0.07,100)": "0.0137197479028414",
 		// COUNT
 		"=COUNT()":                        "0",
 		"=COUNT(E1:F2,\"text\",1,INT(2))": "3",
@@ -878,11 +882,32 @@ func TestCalcCellValue(t *testing.T) {
 		"=MINA(MUNIT(2))":    "0",
 		"=MINA(INT(1))":      "1",
 		"=MINA(A1:B4,MUNIT(1),INT(0),1,E1:F2,\"\")": "0",
+		// PERCENTILE.EXC
+		"=PERCENTILE.EXC(A1:A4,0.2)": "0",
+		"=PERCENTILE.EXC(A1:A4,0.6)": "2",
 		// PERCENTILE.INC
 		"=PERCENTILE.INC(A1:A4,0.2)": "0.6",
 		// PERCENTILE
 		"=PERCENTILE(A1:A4,0.2)": "0.6",
 		"=PERCENTILE(0,0)":       "0",
+		// PERCENTRANK.EXC
+		"=PERCENTRANK.EXC(A1:B4,0)":     "0.142",
+		"=PERCENTRANK.EXC(A1:B4,2)":     "0.428",
+		"=PERCENTRANK.EXC(A1:B4,2.5)":   "0.5",
+		"=PERCENTRANK.EXC(A1:B4,2.6,1)": "0.5",
+		"=PERCENTRANK.EXC(A1:B4,5)":     "0.857",
+		// PERCENTRANK.INC
+		"=PERCENTRANK.INC(A1:B4,0)":     "0",
+		"=PERCENTRANK.INC(A1:B4,2)":     "0.4",
+		"=PERCENTRANK.INC(A1:B4,2.5)":   "0.5",
+		"=PERCENTRANK.INC(A1:B4,2.6,1)": "0.5",
+		"=PERCENTRANK.INC(A1:B4,5)":     "1",
+		// PERCENTRANK
+		"=PERCENTRANK(A1:B4,0)":     "0",
+		"=PERCENTRANK(A1:B4,2)":     "0.4",
+		"=PERCENTRANK(A1:B4,2.5)":   "0.5",
+		"=PERCENTRANK(A1:B4,2.6,1)": "0.5",
+		"=PERCENTRANK(A1:B4,5)":     "1",
 		// PERMUT
 		"=PERMUT(6,6)":  "720",
 		"=PERMUT(7,6)":  "5040",
@@ -892,6 +917,10 @@ func TestCalcCellValue(t *testing.T) {
 		"=PERMUTATIONA(7,6)": "117649",
 		// QUARTILE
 		"=QUARTILE(A1:A4,2)": "1.5",
+		// QUARTILE.EXC
+		"=QUARTILE.EXC(A1:A4,1)": "0.25",
+		"=QUARTILE.EXC(A1:A4,2)": "1.5",
+		"=QUARTILE.EXC(A1:A4,3)": "2.75",
 		// QUARTILE.INC
 		"=QUARTILE.INC(A1:A4,0)": "0",
 		// RANK
@@ -912,9 +941,9 @@ func TestCalcCellValue(t *testing.T) {
 		"=SMALL(A1,1)":    "1",
 		"=SMALL(A1:F2,1)": "1",
 		// STANDARDIZE
-		"=STANDARDIZE( 5.5, 5, 2 )":   "0.25",
-		"=STANDARDIZE( 12, 15, 1.5 )": "-2",
-		"=STANDARDIZE( -2, 0, 5 )":    "-0.4",
+		"=STANDARDIZE(5.5,5,2)":   "0.25",
+		"=STANDARDIZE(12,15,1.5)": "-2",
+		"=STANDARDIZE(-2,0,5)":    "-0.4",
 		// STDEVP
 		"=STDEVP(A1:B2,6,-1)": "2.40947204913349",
 		// STDEV.P
@@ -922,10 +951,23 @@ func TestCalcCellValue(t *testing.T) {
 		// TRIMMEAN
 		"=TRIMMEAN(A1:B4,10%)": "2.5",
 		"=TRIMMEAN(A1:B4,70%)": "2.5",
+		// VAR
+		"=VAR(1,3,5,0,C1)":      "4.916666666666667",
+		"=VAR(1,3,5,0,C1,TRUE)": "4",
+		// VARA
+		"=VARA(1,3,5,0,C1)":      "4.7",
+		"=VARA(1,3,5,0,C1,TRUE)": "3.86666666666667",
 		// VARP
-		"=VARP(A1:A5)": "1.25",
+		"=VARP(A1:A5)":           "1.25",
+		"=VARP(1,3,5,0,C1,TRUE)": "3.2",
 		// VAR.P
 		"=VAR.P(A1:A5)": "1.25",
+		// VAR.S
+		"=VAR.S(1,3,5,0,C1)":      "4.916666666666667",
+		"=VAR.S(1,3,5,0,C1,TRUE)": "4",
+		// VARPA
+		"=VARPA(1,3,5,0,C1)":      "3.76",
+		"=VARPA(1,3,5,0,C1,TRUE)": "3.22222222222222",
 		// WEIBULL
 		"=WEIBULL(1,3,1,FALSE)":  "1.103638323514327",
 		"=WEIBULL(2,5,1.5,TRUE)": "0.985212776817482",
@@ -1067,6 +1109,12 @@ func TestCalcCellValue(t *testing.T) {
 		"=ISOWEEKNUM(\"42370\")":      "53",
 		"=ISOWEEKNUM(\"01/01/2005\")": "53",
 		"=ISOWEEKNUM(\"02/02/2005\")": "5",
+		// MINUTE
+		"=MINUTE(1)":                    "0",
+		"=MINUTE(0.04)":                 "57",
+		"=MINUTE(\"0.04\")":             "57",
+		"=MINUTE(\"13:35:55\")":         "35",
+		"=MINUTE(\"12/09/2015 08:55\")": "55",
 		// MONTH
 		"=MONTH(42171)":           "6",
 		"=MONTH(\"31-May-2015\")": "5",
@@ -1373,6 +1421,33 @@ func TestCalcCellValue(t *testing.T) {
 		"=AMORLINC(150,\"01/01/2015\",\"09/30/2015\",20,20,15%,4)": "0",
 		"=AMORLINC(150,\"01/01/2015\",\"09/30/2015\",20,6,15%,4)":  "0.6875",
 		"=AMORLINC(150,\"01/01/2015\",\"09/30/2015\",20,0,15%,4)":  "16.8125",
+		// COUPDAYBS
+		"=COUPDAYBS(\"02/24/2000\",\"11/24/2000\",4,4)": "0",
+		"=COUPDAYBS(\"03/27/2000\",\"11/29/2000\",4,4)": "28",
+		"=COUPDAYBS(\"02/29/2000\",\"04/01/2000\",4,4)": "58",
+		"=COUPDAYBS(\"01/01/2011\",\"10/25/2012\",4)":   "66",
+		"=COUPDAYBS(\"01/01/2011\",\"10/25/2012\",4,1)": "68",
+		"=COUPDAYBS(\"10/31/2011\",\"02/26/2012\",4,0)": "65",
+		// COUPDAYS
+		"=COUPDAYS(\"01/01/2011\",\"10/25/2012\",4)":   "90",
+		"=COUPDAYS(\"01/01/2011\",\"10/25/2012\",4,1)": "92",
+		// COUPDAYSNC
+		"=COUPDAYSNC(\"01/01/2011\",\"10/25/2012\",4)": "24",
+		"=COUPDAYSNC(\"04/01/2012\",\"03/31/2020\",2)": "179",
+		// COUPNCD
+		"=COUPNCD(\"01/01/2011\",\"10/25/2012\",4)":   "40568",
+		"=COUPNCD(\"01/01/2011\",\"10/25/2012\",4,0)": "40568",
+		"=COUPNCD(\"10/25/2011\",\"01/01/2012\",4)":   "40909",
+		"=COUPNCD(\"04/01/2012\",\"03/31/2020\",2)":   "41182",
+		"=COUPNCD(\"01/01/2000\",\"08/30/2001\",2)":   "36585",
+		// COUPNUM
+		"=COUPNUM(\"01/01/2011\",\"10/25/2012\",4)":   "8",
+		"=COUPNUM(\"01/01/2011\",\"10/25/2012\",4,0)": "8",
+		"=COUPNUM(\"09/30/2017\",\"03/31/2021\",4,0)": "14",
+		// COUPPCD
+		"=COUPPCD(\"01/01/2011\",\"10/25/2012\",4)":   "40476",
+		"=COUPPCD(\"01/01/2011\",\"10/25/2012\",4,0)": "40476",
+		"=COUPPCD(\"10/25/2011\",\"01/01/2012\",4)":   "40817",
 		// CUMIPMT
 		"=CUMIPMT(0.05/12,60,50000,1,12,0)":  "-2294.97753732664",
 		"=CUMIPMT(0.05/12,60,50000,13,24,0)": "-1833.1000665738893",
@@ -1398,6 +1473,8 @@ func TestCalcCellValue(t *testing.T) {
 		"=DOLLARDE(1.01,16)": "1.0625",
 		// DOLLARFR
 		"=DOLLARFR(1.0625,16)": "1.01",
+		// DURATION
+		"=DURATION(\"04/01/2015\",\"03/31/2025\",10%,8%,4)": "6.674422798483131",
 		// EFFECT
 		"=EFFECT(0.1,4)":   "0.103812890625",
 		"=EFFECT(0.025,2)": "0.02515625",
@@ -1417,6 +1494,8 @@ func TestCalcCellValue(t *testing.T) {
 		"=ISPMT(0.05/12,1,60,50000)": "-204.8611111111111",
 		"=ISPMT(0.05/12,2,60,50000)": "-201.38888888888886",
 		"=ISPMT(0.05/12,2,1,50000)":  "208.33333333333334",
+		// MDURATION
+		"=MDURATION(\"04/01/2015\",\"03/31/2025\",10%,8%,4)": "6.543551763218756",
 		// NOMINAL
 		"=NOMINAL(0.025,12)": "0.0247180352381129",
 		// NPER
@@ -1425,17 +1504,33 @@ func TestCalcCellValue(t *testing.T) {
 		"=NPER(0.06/4,-2000,60000,30000,1)": "52.794773709274764",
 		// NPV
 		"=NPV(0.02,-5000,\"\",800)": "-4133.025759323337",
+		// ODDFPRICE
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"03/31/2017\",5.5%,3.5%,100,2)":              "107.69183025662932",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"03/31/2017\",5.5%,3.5%,100,4,1)":            "106.76691501092883",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"03/31/2017\",5.5%,3.5%,100,4,3)":            "106.7819138146997",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"03/31/2017\",5.5%,3.5%,100,4,4)":            "106.77191377246672",
+		"=ODDFPRICE(\"11/11/2008\",\"03/01/2021\",\"10/15/2008\",\"03/01/2009\",7.85%,6.25%,100,2,1)":          "113.59771747407883",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"09/30/2017\",5.5%,3.5%,100,4,0)":            "106.72930611878041",
+		"=ODDFPRICE(\"11/11/2008\",\"03/29/2021\", \"08/15/2008\", \"03/29/2009\", 0.0785, 0.0625, 100, 2, 1)": "113.61826640813996",
 		// PDURATION
 		"=PDURATION(0.04,10000,15000)": "10.33803507150765",
 		// PMT
 		"=PMT(0,8,0,5000,1)":       "-625",
 		"=PMT(0.035/4,8,0,5000,1)": "-600.8520271804658",
+		// PRICE
+		"=PRICE(\"04/01/2012\",\"02/01/2020\",12%,10%,100,2)":   "110.65510517844305",
+		"=PRICE(\"04/01/2012\",\"02/01/2020\",12%,10%,100,2,4)": "110.65510517844305",
+		"=PRICE(\"04/01/2012\",\"03/31/2020\",12%,10%,100,2)":   "110.83448359321572",
+		"=PRICE(\"01/01/2010\",\"06/30/2010\",0.5,1,1,1,4)":     "8.924190888476605",
 		// PPMT
 		"=PPMT(0.05/12,2,60,50000)":   "-738.2918003208238",
 		"=PPMT(0.035/4,2,8,0,5000,1)": "-606.1094824182949",
 		// PRICEDISC
 		"=PRICEDISC(\"04/01/2017\",\"03/31/2021\",2.5%,100)":   "90",
 		"=PRICEDISC(\"04/01/2017\",\"03/31/2021\",2.5%,100,3)": "90",
+		// PRICEMAT
+		"=PRICEMAT(\"04/01/2017\",\"03/31/2021\",\"01/01/2017\",4.5%,2.5%)":   "107.17045454545453",
+		"=PRICEMAT(\"04/01/2017\",\"03/31/2021\",\"01/01/2017\",4.5%,2.5%,0)": "107.17045454545453",
 		// PV
 		"=PV(0,60,1000)":         "-60000",
 		"=PV(5%/12,60,1000)":     "-52990.70632392748",
@@ -1460,6 +1555,23 @@ func TestCalcCellValue(t *testing.T) {
 		"=TBILLPRICE(\"02/01/2017\",\"06/30/2017\",2.75%)": "98.86180555555556",
 		// TBILLYIELD
 		"=TBILLYIELD(\"02/01/2017\",\"06/30/2017\",99)": "0.024405125076266",
+		// VDB
+		"=VDB(10000,1000,5,0,1)":           "4000",
+		"=VDB(10000,1000,5,1,3)":           "3840",
+		"=VDB(10000,1000,5,3,5)":           "1160",
+		"=VDB(10000,1000,5,3,5,0.2,FALSE)": "3600",
+		"=VDB(10000,1000,5,3,5,0.2,TRUE)":  "693.633024",
+		"=VDB(24000,3000,10,0,0.875,2)":    "4200",
+		"=VDB(24000,3000,10,0.1,1)":        "4233.599999999999",
+		"=VDB(24000,3000,10,0.1,1,1)":      "2138.3999999999996",
+		"=VDB(24000,3000,100,50,100,1)":    "10377.294418465235",
+		"=VDB(24000,3000,100,50,100,2)":    "5740.072322090805",
+		// YIELD
+		"=YIELD(\"01/01/2010\",\"06/30/2015\",10%,101,100,4)":               "0.0975631546829798",
+		"=YIELD(\"01/01/2010\",\"06/30/2015\",10%,101,100,4,4)":             "0.0976269355643988",
+		"=YIELD(\"01/01/2010\",\"06/30/2010\",0.5,1,1,1,4)":                 "1.91285866099894",
+		"=YIELD(\"01/01/2010\",\"06/30/2010\",0,1,1,1,4)":                   "0",
+		"=YIELD(\"01/01/2010\",\"01/02/2020\",100,68.15518653988686,1,1,1)": "64",
 		// YIELDDISC
 		"=YIELDDISC(\"01/01/2017\",\"06/30/2017\",97,100)":   "0.0622012325059031",
 		"=YIELDDISC(\"01/01/2017\",\"06/30/2017\",97,100,0)": "0.0622012325059031",
@@ -2045,6 +2157,24 @@ func TestCalcCellValue(t *testing.T) {
 		"=CHIDIST()":         "CHIDIST requires 2 numeric arguments",
 		"=CHIDIST(\"\",3)":   "strconv.ParseFloat: parsing \"\": invalid syntax",
 		"=CHIDIST(0.5,\"\")": "strconv.ParseFloat: parsing \"\": invalid syntax",
+		// CONFIDENCE
+		"=CONFIDENCE()":               "CONFIDENCE requires 3 numeric arguments",
+		"=CONFIDENCE(\"\",0.07,100)":  "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=CONFIDENCE(0.05,\"\",100)":  "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=CONFIDENCE(0.05,0.07,\"\")": "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=CONFIDENCE(0,0.07,100)":     "#NUM!",
+		"=CONFIDENCE(1,0.07,100)":     "#NUM!",
+		"=CONFIDENCE(0.05,0,100)":     "#NUM!",
+		"=CONFIDENCE(0.05,0.07,0.5)":  "#NUM!",
+		// CONFIDENCE.NORM
+		"=CONFIDENCE.NORM()":               "CONFIDENCE.NORM requires 3 numeric arguments",
+		"=CONFIDENCE.NORM(\"\",0.07,100)":  "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=CONFIDENCE.NORM(0.05,\"\",100)":  "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=CONFIDENCE.NORM(0.05,0.07,\"\")": "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=CONFIDENCE.NORM(0,0.07,100)":     "#NUM!",
+		"=CONFIDENCE.NORM(1,0.07,100)":     "#NUM!",
+		"=CONFIDENCE.NORM(0.05,0,100)":     "#NUM!",
+		"=CONFIDENCE.NORM(0.05,0.07,0.5)":  "#NUM!",
 		// COUNTBLANK
 		"=COUNTBLANK()":    "COUNTBLANK requires 1 argument",
 		"=COUNTBLANK(1,2)": "COUNTBLANK requires 1 argument",
@@ -2128,6 +2258,13 @@ func TestCalcCellValue(t *testing.T) {
 		// MINA
 		"=MINA()":     "MINA requires at least 1 argument",
 		"=MINA(NA())": "#N/A",
+		// PERCENTILE.EXC
+		"=PERCENTILE.EXC()":           "PERCENTILE.EXC requires 2 arguments",
+		"=PERCENTILE.EXC(A1:A4,\"\")": "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=PERCENTILE.EXC(A1:A4,-1)":   "#NUM!",
+		"=PERCENTILE.EXC(A1:A4,0)":    "#NUM!",
+		"=PERCENTILE.EXC(A1:A4,1)":    "#NUM!",
+		"=PERCENTILE.EXC(NA(),0.5)":   "#NUM!",
 		// PERCENTILE.INC
 		"=PERCENTILE.INC()": "PERCENTILE.INC requires 2 arguments",
 		// PERCENTILE
@@ -2135,6 +2272,27 @@ func TestCalcCellValue(t *testing.T) {
 		"=PERCENTILE(0,\"\")": "strconv.ParseFloat: parsing \"\": invalid syntax",
 		"=PERCENTILE(0,-1)":   "#N/A",
 		"=PERCENTILE(NA(),1)": "#N/A",
+		// PERCENTRANK.EXC
+		"=PERCENTRANK.EXC()":             "PERCENTRANK.EXC requires 2 or 3 arguments",
+		"=PERCENTRANK.EXC(A1:B4,\"\")":   "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=PERCENTRANK.EXC(A1:B4,0,\"\")": "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=PERCENTRANK.EXC(A1:B4,0,0)":    "PERCENTRANK.EXC arguments significance should be > 1",
+		"=PERCENTRANK.EXC(A1:B4,6)":      "#N/A",
+		"=PERCENTRANK.EXC(NA(),1)":       "#N/A",
+		// PERCENTRANK.INC
+		"=PERCENTRANK.INC()":             "PERCENTRANK.INC requires 2 or 3 arguments",
+		"=PERCENTRANK.INC(A1:B4,\"\")":   "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=PERCENTRANK.INC(A1:B4,0,\"\")": "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=PERCENTRANK.INC(A1:B4,0,0)":    "PERCENTRANK.INC arguments significance should be > 1",
+		"=PERCENTRANK.INC(A1:B4,6)":      "#N/A",
+		"=PERCENTRANK.INC(NA(),1)":       "#N/A",
+		// PERCENTRANK
+		"=PERCENTRANK()":             "PERCENTRANK requires 2 or 3 arguments",
+		"=PERCENTRANK(A1:B4,\"\")":   "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=PERCENTRANK(A1:B4,0,\"\")": "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=PERCENTRANK(A1:B4,0,0)":    "PERCENTRANK arguments significance should be > 1",
+		"=PERCENTRANK(A1:B4,6)":      "#N/A",
+		"=PERCENTRANK(NA(),1)":       "#N/A",
 		// PERMUT
 		"=PERMUT()":       "PERMUT requires 2 numeric arguments",
 		"=PERMUT(\"\",0)": "strconv.ParseFloat: parsing \"\": invalid syntax",
@@ -2151,6 +2309,11 @@ func TestCalcCellValue(t *testing.T) {
 		"=QUARTILE(A1:A4,\"\")": "strconv.ParseFloat: parsing \"\": invalid syntax",
 		"=QUARTILE(A1:A4,-1)":   "#NUM!",
 		"=QUARTILE(A1:A4,5)":    "#NUM!",
+		// QUARTILE.EXC
+		"=QUARTILE.EXC()":           "QUARTILE.EXC requires 2 arguments",
+		"=QUARTILE.EXC(A1:A4,\"\")": "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=QUARTILE.EXC(A1:A4,0)":    "#NUM!",
+		"=QUARTILE.EXC(A1:A4,4)":    "#NUM!",
 		// QUARTILE.INC
 		"=QUARTILE.INC()": "QUARTILE.INC requires 2 arguments",
 		// RANK
@@ -2191,12 +2354,20 @@ func TestCalcCellValue(t *testing.T) {
 		"=TRIMMEAN(A1,\"\")": "strconv.ParseFloat: parsing \"\": invalid syntax",
 		"=TRIMMEAN(A1,1)":    "#NUM!",
 		"=TRIMMEAN(A1,-1)":   "#NUM!",
+		// VAR
+		"=VAR()": "VAR requires at least 1 argument",
+		// VARA
+		"=VARA()": "VARA requires at least 1 argument",
 		// VARP
 		"=VARP()":     "VARP requires at least 1 argument",
 		"=VARP(\"\")": "#DIV/0!",
 		// VAR.P
 		"=VAR.P()":     "VAR.P requires at least 1 argument",
 		"=VAR.P(\"\")": "#DIV/0!",
+		// VAR.S
+		"=VAR.S()": "VAR.S requires at least 1 argument",
+		// VARPA
+		"=VARPA()": "VARPA requires at least 1 argument",
 		// WEIBULL
 		"=WEIBULL()":               "WEIBULL requires 4 arguments",
 		"=WEIBULL(\"\",1,1,FALSE)": "#VALUE!",
@@ -2345,6 +2516,11 @@ func TestCalcCellValue(t *testing.T) {
 		"=ISOWEEKNUM(\"\")":                "#VALUE!",
 		"=ISOWEEKNUM(\"January 25, 100\")": "#VALUE!",
 		"=ISOWEEKNUM(-1)":                  "#NUM!",
+		// MINUTE
+		"=MINUTE()":             "MINUTE requires exactly 1 argument",
+		"=MINUTE(-1)":           "MINUTE only accepts positive argument",
+		"=MINUTE(\"\")":         "#VALUE!",
+		"=MINUTE(\"13:60:55\")": "#VALUE!",
 		// MONTH
 		"=MONTH()":                    "MONTH requires exactly 1 argument",
 		"=MONTH(0,0)":                 "MONTH requires exactly 1 argument",
@@ -2642,6 +2818,54 @@ func TestCalcCellValue(t *testing.T) {
 		"=AMORLINC(150,\"01/01/2015\",\"09/30/2015\",20,1,-1)":       "#NUM!",
 		"=AMORLINC(150,\"01/01/2015\",\"09/30/2015\",20,1,20%,\"\")": "#NUM!",
 		"=AMORLINC(150,\"01/01/2015\",\"09/30/2015\",20,1,20%,5)":    "invalid basis",
+		// COUPDAYBS
+		"=COUPDAYBS()":                                     "COUPDAYBS requires 3 or 4 arguments",
+		"=COUPDAYBS(\"\",\"10/25/2012\",4)":                "#VALUE!",
+		"=COUPDAYBS(\"01/01/2011\",\"\",4)":                "#VALUE!",
+		"=COUPDAYBS(\"01/01/2011\",\"10/25/2012\",\"\")":   "#VALUE!",
+		"=COUPDAYBS(\"01/01/2011\",\"10/25/2012\",4,\"\")": "#NUM!",
+		"=COUPDAYBS(\"10/25/2012\",\"01/01/2011\",4)":      "COUPDAYBS requires maturity > settlement",
+		// COUPDAYS
+		"=COUPDAYS()":                                     "COUPDAYS requires 3 or 4 arguments",
+		"=COUPDAYS(\"\",\"10/25/2012\",4)":                "#VALUE!",
+		"=COUPDAYS(\"01/01/2011\",\"\",4)":                "#VALUE!",
+		"=COUPDAYS(\"01/01/2011\",\"10/25/2012\",\"\")":   "#VALUE!",
+		"=COUPDAYS(\"01/01/2011\",\"10/25/2012\",4,\"\")": "#NUM!",
+		"=COUPDAYS(\"10/25/2012\",\"01/01/2011\",4)":      "COUPDAYS requires maturity > settlement",
+		// COUPDAYSNC
+		"=COUPDAYSNC()":                                     "COUPDAYSNC requires 3 or 4 arguments",
+		"=COUPDAYSNC(\"\",\"10/25/2012\",4)":                "#VALUE!",
+		"=COUPDAYSNC(\"01/01/2011\",\"\",4)":                "#VALUE!",
+		"=COUPDAYSNC(\"01/01/2011\",\"10/25/2012\",\"\")":   "#VALUE!",
+		"=COUPDAYSNC(\"01/01/2011\",\"10/25/2012\",4,\"\")": "#NUM!",
+		"=COUPDAYSNC(\"10/25/2012\",\"01/01/2011\",4)":      "COUPDAYSNC requires maturity > settlement",
+		// COUPNCD
+		"=COUPNCD()": "COUPNCD requires 3 or 4 arguments",
+		"=COUPNCD(\"01/01/2011\",\"10/25/2012\",4,0,0)":  "COUPNCD requires 3 or 4 arguments",
+		"=COUPNCD(\"\",\"10/25/2012\",4)":                "#VALUE!",
+		"=COUPNCD(\"01/01/2011\",\"\",4)":                "#VALUE!",
+		"=COUPNCD(\"01/01/2011\",\"10/25/2012\",\"\")":   "#VALUE!",
+		"=COUPNCD(\"01/01/2011\",\"10/25/2012\",4,\"\")": "#NUM!",
+		"=COUPNCD(\"01/01/2011\",\"10/25/2012\",3)":      "#NUM!",
+		"=COUPNCD(\"10/25/2012\",\"01/01/2011\",4)":      "COUPNCD requires maturity > settlement",
+		// COUPNUM
+		"=COUPNUM()": "COUPNUM requires 3 or 4 arguments",
+		"=COUPNUM(\"01/01/2011\",\"10/25/2012\",4,0,0)":  "COUPNUM requires 3 or 4 arguments",
+		"=COUPNUM(\"\",\"10/25/2012\",4)":                "#VALUE!",
+		"=COUPNUM(\"01/01/2011\",\"\",4)":                "#VALUE!",
+		"=COUPNUM(\"01/01/2011\",\"10/25/2012\",\"\")":   "#VALUE!",
+		"=COUPNUM(\"01/01/2011\",\"10/25/2012\",4,\"\")": "#NUM!",
+		"=COUPNUM(\"01/01/2011\",\"10/25/2012\",3)":      "#NUM!",
+		"=COUPNUM(\"10/25/2012\",\"01/01/2011\",4)":      "COUPNUM requires maturity > settlement",
+		// COUPPCD
+		"=COUPPCD()": "COUPPCD requires 3 or 4 arguments",
+		"=COUPPCD(\"01/01/2011\",\"10/25/2012\",4,0,0)":  "COUPPCD requires 3 or 4 arguments",
+		"=COUPPCD(\"\",\"10/25/2012\",4)":                "#VALUE!",
+		"=COUPPCD(\"01/01/2011\",\"\",4)":                "#VALUE!",
+		"=COUPPCD(\"01/01/2011\",\"10/25/2012\",\"\")":   "#VALUE!",
+		"=COUPPCD(\"01/01/2011\",\"10/25/2012\",4,\"\")": "#NUM!",
+		"=COUPPCD(\"01/01/2011\",\"10/25/2012\",3)":      "#NUM!",
+		"=COUPPCD(\"10/25/2012\",\"01/01/2011\",4)":      "COUPPCD requires maturity > settlement",
 		// CUMIPMT
 		"=CUMIPMT()":               "CUMIPMT requires 6 arguments",
 		"=CUMIPMT(0,0,0,0,0,2)":    "#N/A",
@@ -2705,6 +2929,19 @@ func TestCalcCellValue(t *testing.T) {
 		"=DOLLARFR(0,\"\")": "strconv.ParseFloat: parsing \"\": invalid syntax",
 		"=DOLLARFR(0,-1)":   "#NUM!",
 		"=DOLLARFR(0,0)":    "#DIV/0!",
+		// DURATION
+		"=DURATION()": "DURATION requires 5 or 6 arguments",
+		"=DURATION(\"\",\"03/31/2025\",10%,8%,4)":                "#VALUE!",
+		"=DURATION(\"04/01/2015\",\"\",10%,8%,4)":                "#VALUE!",
+		"=DURATION(\"03/31/2025\",\"04/01/2015\",10%,8%,4)":      "DURATION requires maturity > settlement",
+		"=DURATION(\"04/01/2015\",\"03/31/2025\",-1,8%,4)":       "DURATION requires coupon >= 0",
+		"=DURATION(\"04/01/2015\",\"03/31/2025\",10%,-1,4)":      "DURATION requires yld >= 0",
+		"=DURATION(\"04/01/2015\",\"03/31/2025\",\"\",8%,4)":     "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=DURATION(\"04/01/2015\",\"03/31/2025\",10%,\"\",4)":    "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=DURATION(\"04/01/2015\",\"03/31/2025\",10%,8%,\"\")":   "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=DURATION(\"04/01/2015\",\"03/31/2025\",10%,8%,3)":      "#NUM!",
+		"=DURATION(\"04/01/2015\",\"03/31/2025\",10%,8%,4,\"\")": "#NUM!",
+		"=DURATION(\"04/01/2015\",\"03/31/2025\",10%,8%,4,5)":    "invalid basis",
 		// EFFECT
 		"=EFFECT()":       "EFFECT requires 2 arguments",
 		"=EFFECT(\"\",0)": "strconv.ParseFloat: parsing \"\": invalid syntax",
@@ -2753,6 +2990,19 @@ func TestCalcCellValue(t *testing.T) {
 		"=ISPMT(0,\"\",0,0)": "strconv.ParseFloat: parsing \"\": invalid syntax",
 		"=ISPMT(0,0,\"\",0)": "strconv.ParseFloat: parsing \"\": invalid syntax",
 		"=ISPMT(0,0,0,\"\")": "strconv.ParseFloat: parsing \"\": invalid syntax",
+		// MDURATION
+		"=MDURATION()": "MDURATION requires 5 or 6 arguments",
+		"=MDURATION(\"\",\"03/31/2025\",10%,8%,4)":                "#VALUE!",
+		"=MDURATION(\"04/01/2015\",\"\",10%,8%,4)":                "#VALUE!",
+		"=MDURATION(\"03/31/2025\",\"04/01/2015\",10%,8%,4)":      "MDURATION requires maturity > settlement",
+		"=MDURATION(\"04/01/2015\",\"03/31/2025\",-1,8%,4)":       "MDURATION requires coupon >= 0",
+		"=MDURATION(\"04/01/2015\",\"03/31/2025\",10%,-1,4)":      "MDURATION requires yld >= 0",
+		"=MDURATION(\"04/01/2015\",\"03/31/2025\",\"\",8%,4)":     "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=MDURATION(\"04/01/2015\",\"03/31/2025\",10%,\"\",4)":    "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=MDURATION(\"04/01/2015\",\"03/31/2025\",10%,8%,\"\")":   "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=MDURATION(\"04/01/2015\",\"03/31/2025\",10%,8%,3)":      "#NUM!",
+		"=MDURATION(\"04/01/2015\",\"03/31/2025\",10%,8%,4,\"\")": "#NUM!",
+		"=MDURATION(\"04/01/2015\",\"03/31/2025\",10%,8%,4,5)":    "invalid basis",
 		// NOMINAL
 		"=NOMINAL()":       "NOMINAL requires 2 arguments",
 		"=NOMINAL(\"\",0)": "strconv.ParseFloat: parsing \"\": invalid syntax",
@@ -2772,6 +3022,26 @@ func TestCalcCellValue(t *testing.T) {
 		// NPV
 		"=NPV()":       "NPV requires at least 2 arguments",
 		"=NPV(\"\",0)": "strconv.ParseFloat: parsing \"\": invalid syntax",
+		// ODDFPRICE
+		"=ODDFPRICE()": "ODDFPRICE requires 8 or 9 arguments",
+		"=ODDFPRICE(\"\",\"03/31/2021\",\"12/01/2016\",\"03/31/2017\",5.5%,3.5%,100,2)":                "#VALUE!",
+		"=ODDFPRICE(\"02/01/2017\",\"\",\"12/01/2016\",\"03/31/2017\",5.5%,3.5%,100,2)":                "#VALUE!",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"\",\"03/31/2017\",5.5%,3.5%,100,2)":                "#VALUE!",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"\",5.5%,3.5%,100,2)":                "#VALUE!",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"03/31/2017\",\"\",3.5%,100,2)":      "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"03/31/2017\",5.5%,\"\",100,2)":      "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"03/31/2017\",5.5%,3.5%,\"\",2)":     "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"03/31/2017\",5.5%,3.5%,100,\"\")":   "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"02/01/2017\",\"03/31/2017\",5.5%,3.5%,100,2)":      "ODDFPRICE requires settlement > issue",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"02/01/2017\",5.5%,3.5%,100,2)":      "ODDFPRICE requires first_coupon > settlement",
+		"=ODDFPRICE(\"02/01/2017\",\"02/01/2017\",\"12/01/2016\",\"03/31/2017\",5.5%,3.5%,100,2)":      "ODDFPRICE requires maturity > first_coupon",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"03/31/2017\",-1,3.5%,100,2)":        "ODDFPRICE requires rate >= 0",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"03/31/2017\",5.5%,-1,100,2)":        "ODDFPRICE requires yld >= 0",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"03/31/2017\",5.5%,3.5%,0,2)":        "ODDFPRICE requires redemption > 0",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"03/31/2017\",5.5%,3.5%,100,2,\"\")": "#NUM!",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"03/31/2017\",5.5%,3.5%,100,3)":      "#NUM!",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"03/30/2017\",5.5%,3.5%,100,4)":      "#NUM!",
+		"=ODDFPRICE(\"02/01/2017\",\"03/31/2021\",\"12/01/2016\",\"03/31/2017\",5.5%,3.5%,100,2,5)":    "invalid basis",
 		// PDURATION
 		"=PDURATION()":         "PDURATION requires 3 arguments",
 		"=PDURATION(\"\",0,0)": "strconv.ParseFloat: parsing \"\": invalid syntax",
@@ -2787,6 +3057,20 @@ func TestCalcCellValue(t *testing.T) {
 		"=PMT(0,0,\"\",0,0)": "strconv.ParseFloat: parsing \"\": invalid syntax",
 		"=PMT(0,0,0,\"\",0)": "strconv.ParseFloat: parsing \"\": invalid syntax",
 		"=PMT(0,0,0,0,\"\")": "strconv.ParseFloat: parsing \"\": invalid syntax",
+		// PRICE
+		"=PRICE()": "PRICE requires 6 or 7 arguments",
+		"=PRICE(\"\",\"02/01/2020\",12%,10%,100,2,4)":              "#VALUE!",
+		"=PRICE(\"04/01/2012\",\"\",12%,10%,100,2,4)":              "#VALUE!",
+		"=PRICE(\"04/01/2012\",\"02/01/2020\",\"\",10%,100,2,4)":   "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=PRICE(\"04/01/2012\",\"02/01/2020\",12%,\"\",100,2,4)":   "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=PRICE(\"04/01/2012\",\"02/01/2020\",12%,10%,\"\",2,4)":   "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=PRICE(\"04/01/2012\",\"02/01/2020\",12%,10%,100,\"\",4)": "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=PRICE(\"04/01/2012\",\"02/01/2020\",-1,10%,100,2,4)":     "PRICE requires rate >= 0",
+		"=PRICE(\"04/01/2012\",\"02/01/2020\",12%,-1,100,2,4)":     "PRICE requires yld >= 0",
+		"=PRICE(\"04/01/2012\",\"02/01/2020\",12%,10%,0,2,4)":      "PRICE requires redemption > 0",
+		"=PRICE(\"04/01/2012\",\"02/01/2020\",12%,10%,100,2,\"\")": "#NUM!",
+		"=PRICE(\"04/01/2012\",\"02/01/2020\",12%,10%,100,3,4)":    "#NUM!",
+		"=PRICE(\"04/01/2012\",\"02/01/2020\",12%,10%,100,2,5)":    "invalid basis",
 		// PPMT
 		"=PPMT()":               "PPMT requires at least 4 arguments",
 		"=PPMT(0,0,0,0,0,0,0)":  "PPMT allows at most 6 arguments",
@@ -2810,6 +3094,19 @@ func TestCalcCellValue(t *testing.T) {
 		"=PRICEDISC(\"04/01/2016\",\"03/31/2021\",0,100)":       "PRICEDISC requires discount > 0",
 		"=PRICEDISC(\"04/01/2016\",\"03/31/2021\",95,0)":        "PRICEDISC requires redemption > 0",
 		"=PRICEDISC(\"04/01/2016\",\"03/31/2021\",95,100,5)":    "invalid basis",
+		// PRICEMAT
+		"=PRICEMAT()": "PRICEMAT requires 5 or 6 arguments",
+		"=PRICEMAT(\"\",\"03/31/2021\",\"01/01/2017\",4.5%,2.5%)":                "#VALUE!",
+		"=PRICEMAT(\"04/01/2017\",\"\",\"01/01/2017\",4.5%,2.5%)":                "#VALUE!",
+		"=PRICEMAT(\"04/01/2017\",\"03/31/2021\",\"\",4.5%,2.5%)":                "#VALUE!",
+		"=PRICEMAT(\"04/01/2017\",\"03/31/2021\",\"01/01/2017\",\"\",2.5%)":      "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=PRICEMAT(\"04/01/2017\",\"03/31/2021\",\"01/01/2017\",4.5%,\"\")":      "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=PRICEMAT(\"04/01/2017\",\"03/31/2021\",\"01/01/2017\",4.5%,2.5%,\"\")": "#NUM!",
+		"=PRICEMAT(\"03/31/2021\",\"04/01/2017\",\"01/01/2017\",4.5%,2.5%)":      "PRICEMAT requires maturity > settlement",
+		"=PRICEMAT(\"01/01/2017\",\"03/31/2021\",\"04/01/2017\",4.5%,2.5%)":      "PRICEMAT requires settlement > issue",
+		"=PRICEMAT(\"04/01/2017\",\"03/31/2021\",\"01/01/2017\",-1,2.5%)":        "PRICEMAT requires rate >= 0",
+		"=PRICEMAT(\"04/01/2017\",\"03/31/2021\",\"01/01/2017\",4.5%,-1)":        "PRICEMAT requires yld >= 0",
+		"=PRICEMAT(\"04/01/2017\",\"03/31/2021\",\"01/01/2017\",4.5%,2.5%,5)":    "invalid basis",
 		// PV
 		"=PV()":                     "PV requires at least 3 arguments",
 		"=PV(10%/4,16,2000,0,1,0)":  "PV allows at most 5 arguments",
@@ -2877,6 +3174,37 @@ func TestCalcCellValue(t *testing.T) {
 		"=TBILLYIELD(\"01/01/2017\",\"06/30/2017\",0)":    "#NUM!",
 		"=TBILLYIELD(\"01/01/2017\",\"06/30/2018\",2.5%)": "#NUM!",
 		"=TBILLYIELD(\"06/30/2017\",\"01/01/2017\",2.5%)": "#NUM!",
+		// VDB
+		"=VDB()":                          "VDB requires 5 or 7 arguments",
+		"=VDB(-1,1000,5,0,1)":             "VDB requires cost >= 0",
+		"=VDB(10000,-1,5,0,1)":            "VDB requires salvage >= 0",
+		"=VDB(10000,1000,0,0,1)":          "VDB requires life > 0",
+		"=VDB(10000,1000,5,-1,1)":         "VDB requires start_period > 0",
+		"=VDB(10000,1000,5,2,1)":          "VDB requires start_period <= end_period",
+		"=VDB(10000,1000,5,0,6)":          "VDB requires end_period <= life",
+		"=VDB(10000,1000,5,0,1,-0.2)":     "VDB requires factor >= 0",
+		"=VDB(\"\",1000,5,0,1)":           "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=VDB(10000,\"\",5,0,1)":          "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=VDB(10000,1000,\"\",0,1)":       "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=VDB(10000,1000,5,\"\",1)":       "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=VDB(10000,1000,5,0,\"\")":       "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=VDB(10000,1000,5,0,1,\"\")":     "#NUM!",
+		"=VDB(10000,1000,5,0,1,0.2,\"\")": "#NUM!",
+		// YIELD
+		"=YIELD()": "YIELD requires 6 or 7 arguments",
+		"=YIELD(\"\",\"06/30/2015\",10%,101,100,4)":                "#VALUE!",
+		"=YIELD(\"01/01/2010\",\"\",10%,101,100,4)":                "#VALUE!",
+		"=YIELD(\"01/01/2010\",\"06/30/2015\",\"\",101,100,4)":     "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=YIELD(\"01/01/2010\",\"06/30/2015\",10%,\"\",100,4)":     "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=YIELD(\"01/01/2010\",\"06/30/2015\",10%,101,\"\",4)":     "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=YIELD(\"01/01/2010\",\"06/30/2015\",10%,101,100,\"\")":   "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=YIELD(\"01/01/2010\",\"06/30/2015\",10%,101,100,4,\"\")": "#NUM!",
+		"=YIELD(\"01/01/2010\",\"06/30/2015\",10%,101,100,3)":      "#NUM!",
+		"=YIELD(\"01/01/2010\",\"06/30/2015\",10%,101,100,4,5)":    "invalid basis",
+		"=YIELD(\"01/01/2010\",\"06/30/2015\",-1,101,100,4)":       "PRICE requires rate >= 0",
+		"=YIELD(\"01/01/2010\",\"06/30/2015\",10%,0,100,4)":        "PRICE requires pr > 0",
+		"=YIELD(\"01/01/2010\",\"06/30/2015\",10%,101,-1,4)":       "PRICE requires redemption >= 0",
+		// "=YIELD(\"01/01/2010\",\"06/30/2015\",10%,101,100,4)": "PRICE requires rate >= 0",
 		// YIELDDISC
 		"=YIELDDISC()": "YIELDDISC requires 4 or 5 arguments",
 		"=YIELDDISC(\"\",\"06/30/2017\",97,100,0)":              "#VALUE!",
@@ -3253,6 +3581,84 @@ func TestCalcMIRR(t *testing.T) {
 	for formula, expected := range calcError {
 		assert.NoError(t, f.SetCellFormula("Sheet1", "B1", formula))
 		result, err := f.CalcCellValue("Sheet1", "B1")
+		assert.EqualError(t, err, expected, formula)
+		assert.Equal(t, "", result, formula)
+	}
+}
+
+func TestCalcXIRR(t *testing.T) {
+	cellData := [][]interface{}{
+		{-100.00, "01/01/2016"},
+		{20.00, "04/01/2016"},
+		{40.00, "10/01/2016"},
+		{25.00, "02/01/2017"},
+		{8.00, "03/01/2017"},
+		{15.00, "06/01/2017"},
+		{-1e-10, "09/01/2017"}}
+	f := prepareCalcData(cellData)
+	formulaList := map[string]string{
+		"=XIRR(A1:A4,B1:B4)":     "-0.196743861298328",
+		"=XIRR(A1:A6,B1:B6)":     "0.09443907444452",
+		"=XIRR(A1:A6,B1:B6,0.1)": "0.0944390744445201",
+	}
+	for formula, expected := range formulaList {
+		assert.NoError(t, f.SetCellFormula("Sheet1", "C1", formula))
+		result, err := f.CalcCellValue("Sheet1", "C1")
+		assert.NoError(t, err, formula)
+		assert.Equal(t, expected, result, formula)
+	}
+	calcError := map[string]string{
+		"=XIRR()":                 "XIRR requires 2 or 3 arguments",
+		"=XIRR(A1:A4,B1:B4,-1)":   "XIRR requires guess > -1",
+		"=XIRR(\"\",B1:B4)":       "#NUM!",
+		"=XIRR(A1:A4,\"\")":       "#NUM!",
+		"=XIRR(A1:A4,B1:B4,\"\")": "#NUM!",
+		"=XIRR(A2:A6,B2:B6)":      "#NUM!",
+		"=XIRR(A2:A7,B2:B7)":      "#NUM!",
+	}
+	for formula, expected := range calcError {
+		assert.NoError(t, f.SetCellFormula("Sheet1", "C1", formula))
+		result, err := f.CalcCellValue("Sheet1", "C1")
+		assert.EqualError(t, err, expected, formula)
+		assert.Equal(t, "", result, formula)
+	}
+}
+
+func TestCalcXNPV(t *testing.T) {
+	cellData := [][]interface{}{{nil, 0.05},
+		{"01/01/2016", -10000, nil},
+		{"02/01/2016", 2000},
+		{"05/01/2016", 2400},
+		{"07/01/2016", 2900},
+		{"11/01/2016", 3500},
+		{"01/01/2017", 4100},
+		{},
+		{"02/01/2016"},
+		{"01/01/2016"}}
+	f := prepareCalcData(cellData)
+	formulaList := map[string]string{
+		"=XNPV(B1,B2:B7,A2:A7)": "4447.938009440515",
+	}
+	for formula, expected := range formulaList {
+		assert.NoError(t, f.SetCellFormula("Sheet1", "C1", formula))
+		result, err := f.CalcCellValue("Sheet1", "C1")
+		assert.NoError(t, err, formula)
+		assert.Equal(t, expected, result, formula)
+	}
+	calcError := map[string]string{
+		"=XNPV()":                 "XNPV requires 3 arguments",
+		"=XNPV(\"\",B2:B7,A2:A7)": "strconv.ParseFloat: parsing \"\": invalid syntax",
+		"=XNPV(0,B2:B7,A2:A7)":    "XNPV requires rate > 0",
+		"=XNPV(B1,\"\",A2:A7)":    "#NUM!",
+		"=XNPV(B1,B2:B7,\"\")":    "#NUM!",
+		"=XNPV(B1,B2:B7,C2:C7)":   "#NUM!",
+		"=XNPV(B1,B2,A2)":         "#NUM!",
+		"=XNPV(B1,B2:B3,A2:A5)":   "#NUM!",
+		"=XNPV(B1,B2:B3,A9:A10)":  "#VALUE!",
+	}
+	for formula, expected := range calcError {
+		assert.NoError(t, f.SetCellFormula("Sheet1", "C1", formula))
+		result, err := f.CalcCellValue("Sheet1", "C1")
 		assert.EqualError(t, err, expected, formula)
 		assert.Equal(t, "", result, formula)
 	}

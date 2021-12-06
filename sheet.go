@@ -24,8 +24,10 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf16"
 	"unicode/utf8"
 
 	"github.com/mohae/deepcopy"
@@ -120,6 +122,19 @@ func (f *File) getWorkbookRelsPath() (path string) {
 	return
 }
 
+// getWorksheetPath construct a target XML as xl/worksheets/sheet%d by split
+// path, compatible with different types of relative paths in
+// workbook.xml.rels, for example: worksheets/sheet%d.xml
+// and /xl/worksheets/sheet%d.xml
+func (f *File) getWorksheetPath(relTarget string) (path string) {
+	path = filepath.ToSlash(strings.TrimPrefix(
+		strings.Replace(filepath.Clean(fmt.Sprintf("%s/%s", filepath.Dir(f.getWorkbookPath()), relTarget)), "\\", "/", -1), "/"))
+	if strings.HasPrefix(relTarget, "/") {
+		path = filepath.ToSlash(strings.TrimPrefix(strings.Replace(filepath.Clean(relTarget), "\\", "/", -1), "/"))
+	}
+	return path
+}
+
 // workbookReader provides a function to get the pointer to the workbook.xml
 // structure after deserialization.
 func (f *File) workbookReader() *xlsxWorkbook {
@@ -149,6 +164,37 @@ func (f *File) workBookWriter() {
 	}
 }
 
+// mergeExpandedCols merge expanded columns.
+func (f *File) mergeExpandedCols(ws *xlsxWorksheet) {
+	sort.Slice(ws.Cols.Col, func(i, j int) bool {
+		return ws.Cols.Col[i].Min < ws.Cols.Col[j].Min
+	})
+	columns := []xlsxCol{}
+	for i, n := 0, len(ws.Cols.Col); i < n; {
+		left := i
+		for i++; i < n && reflect.DeepEqual(
+			xlsxCol{
+				BestFit:      ws.Cols.Col[i-1].BestFit,
+				Collapsed:    ws.Cols.Col[i-1].Collapsed,
+				CustomWidth:  ws.Cols.Col[i-1].CustomWidth,
+				Hidden:       ws.Cols.Col[i-1].Hidden,
+				Max:          ws.Cols.Col[i-1].Max + 1,
+				Min:          ws.Cols.Col[i-1].Min + 1,
+				OutlineLevel: ws.Cols.Col[i-1].OutlineLevel,
+				Phonetic:     ws.Cols.Col[i-1].Phonetic,
+				Style:        ws.Cols.Col[i-1].Style,
+				Width:        ws.Cols.Col[i-1].Width,
+			}, ws.Cols.Col[i]); i++ {
+		}
+		column := deepcopy.Copy(ws.Cols.Col[left]).(xlsxCol)
+		if left < i-1 {
+			column.Max = ws.Cols.Col[i-1].Min
+		}
+		columns = append(columns, column)
+	}
+	ws.Cols.Col = columns
+}
+
 // workSheetWriter provides a function to save xl/worksheets/sheet%d.xml after
 // serialize structure.
 func (f *File) workSheetWriter() {
@@ -160,6 +206,9 @@ func (f *File) workSheetWriter() {
 			sheet := ws.(*xlsxWorksheet)
 			if sheet.MergeCells != nil && len(sheet.MergeCells.Cells) > 0 {
 				_ = f.mergeOverlapCells(sheet)
+			}
+			if sheet.Cols != nil && len(sheet.Cols.Col) > 0 {
+				f.mergeExpandedCols(sheet)
 			}
 			for k, v := range sheet.SheetData.Row {
 				sheet.SheetData.Row[k].C = trimCell(v.C)
@@ -198,7 +247,7 @@ func trimCell(column []xlsxC) []xlsxC {
 			i++
 		}
 	}
-	return col[0:i]
+	return col[:i]
 }
 
 // setContentTypes provides a function to read and update property of contents
@@ -416,11 +465,13 @@ func (f *File) GetSheetIndex(name string) int {
 //    if err != nil {
 //        return
 //    }
+//    defer func() {
+//        if err := f.Close(); err != nil {
+//            fmt.Println(err)
+//        }
+//    }()
 //    for index, name := range f.GetSheetMap() {
 //        fmt.Println(index, name)
-//    }
-//    if err = f.Close(); err != nil {
-//        fmt.Println(err)
 //    }
 //
 func (f *File) GetSheetMap() map[int]string {
@@ -453,15 +504,7 @@ func (f *File) getSheetMap() map[string]string {
 	for _, v := range f.workbookReader().Sheets.Sheet {
 		for _, rel := range f.relsReader(f.getWorkbookRelsPath()).Relationships {
 			if rel.ID == v.ID {
-				// Construct a target XML as xl/worksheets/sheet%d by split
-				// path, compatible with different types of relative paths in
-				// workbook.xml.rels, for example: worksheets/sheet%d.xml
-				// and /xl/worksheets/sheet%d.xml
-				path := filepath.ToSlash(strings.TrimPrefix(
-					strings.Replace(filepath.Clean(fmt.Sprintf("%s/%s", filepath.Dir(f.getWorkbookPath()), rel.Target)), "\\", "/", -1), "/"))
-				if strings.HasPrefix(rel.Target, "/") {
-					path = filepath.ToSlash(strings.TrimPrefix(strings.Replace(filepath.Clean(rel.Target), "\\", "/", -1), "/"))
-				}
+				path := f.getWorksheetPath(rel.Target)
 				if _, ok := f.Pkg.Load(path); ok {
 					maps[v.Name] = path
 				}
@@ -512,46 +555,55 @@ func (f *File) DeleteSheet(name string) {
 	wbRels := f.relsReader(f.getWorkbookRelsPath())
 	activeSheetName := f.GetSheetName(f.GetActiveSheetIndex())
 	deleteLocalSheetID := f.GetSheetIndex(name)
-	// Delete and adjust defined names
-	if wb.DefinedNames != nil {
-		for idx := 0; idx < len(wb.DefinedNames.DefinedName); idx++ {
-			dn := wb.DefinedNames.DefinedName[idx]
-			if dn.LocalSheetID != nil {
-				localSheetID := *dn.LocalSheetID
-				if localSheetID == deleteLocalSheetID {
-					wb.DefinedNames.DefinedName = append(wb.DefinedNames.DefinedName[:idx], wb.DefinedNames.DefinedName[idx+1:]...)
-					idx--
-				} else if localSheetID > deleteLocalSheetID {
-					wb.DefinedNames.DefinedName[idx].LocalSheetID = intPtr(*dn.LocalSheetID - 1)
-				}
-			}
-		}
-	}
+	deleteAndAdjustDefinedNames(wb, deleteLocalSheetID)
+
 	for idx, sheet := range wb.Sheets.Sheet {
-		if strings.EqualFold(sheet.Name, sheetName) {
-			wb.Sheets.Sheet = append(wb.Sheets.Sheet[:idx], wb.Sheets.Sheet[idx+1:]...)
-			var sheetXML, rels string
-			if wbRels != nil {
-				for _, rel := range wbRels.Relationships {
-					if rel.ID == sheet.ID {
-						sheetXML = rel.Target
-						rels = "xl/worksheets/_rels/" + strings.TrimPrefix(f.sheetMap[sheetName], "xl/worksheets/") + ".rels"
-					}
+		if !strings.EqualFold(sheet.Name, sheetName) {
+			continue
+		}
+
+		wb.Sheets.Sheet = append(wb.Sheets.Sheet[:idx], wb.Sheets.Sheet[idx+1:]...)
+		var sheetXML, rels string
+		if wbRels != nil {
+			for _, rel := range wbRels.Relationships {
+				if rel.ID == sheet.ID {
+					sheetXML = f.getWorksheetPath(rel.Target)
+					rels = "xl/worksheets/_rels/" + strings.TrimPrefix(f.sheetMap[sheetName], "xl/worksheets/") + ".rels"
 				}
 			}
-			target := f.deleteSheetFromWorkbookRels(sheet.ID)
-			f.deleteSheetFromContentTypes(target)
-			f.deleteCalcChain(sheet.SheetID, "")
-			delete(f.sheetMap, sheet.Name)
-			f.Pkg.Delete(sheetXML)
-			f.Pkg.Delete(rels)
-			f.Relationships.Delete(rels)
-			f.Sheet.Delete(sheetXML)
-			delete(f.xmlAttr, sheetXML)
-			f.SheetCount--
 		}
+		target := f.deleteSheetFromWorkbookRels(sheet.ID)
+		f.deleteSheetFromContentTypes(target)
+		f.deleteCalcChain(sheet.SheetID, "")
+		delete(f.sheetMap, sheet.Name)
+		f.Pkg.Delete(sheetXML)
+		f.Pkg.Delete(rels)
+		f.Relationships.Delete(rels)
+		f.Sheet.Delete(sheetXML)
+		delete(f.xmlAttr, sheetXML)
+		f.SheetCount--
 	}
 	f.SetActiveSheet(f.GetSheetIndex(activeSheetName))
+}
+
+// deleteAndAdjustDefinedNames delete and adjust defined name in the workbook
+// by given worksheet ID.
+func deleteAndAdjustDefinedNames(wb *xlsxWorkbook, deleteLocalSheetID int) {
+	if wb == nil || wb.DefinedNames == nil {
+		return
+	}
+	for idx := 0; idx < len(wb.DefinedNames.DefinedName); idx++ {
+		dn := wb.DefinedNames.DefinedName[idx]
+		if dn.LocalSheetID != nil {
+			localSheetID := *dn.LocalSheetID
+			if localSheetID == deleteLocalSheetID {
+				wb.DefinedNames.DefinedName = append(wb.DefinedNames.DefinedName[:idx], wb.DefinedNames.DefinedName[idx+1:]...)
+				idx--
+			} else if localSheetID > deleteLocalSheetID {
+				wb.DefinedNames.DefinedName[idx].LocalSheetID = intPtr(*dn.LocalSheetID - 1)
+			}
+		}
+	}
 }
 
 // deleteSheetFromWorkbookRels provides a function to remove worksheet
@@ -1057,8 +1109,8 @@ func (f *File) SetHeaderFooter(sheet string, settings *FormatHeaderFooter) error
 	// Check 6 string type fields: OddHeader, OddFooter, EvenHeader, EvenFooter,
 	// FirstFooter, FirstHeader
 	for i := 4; i < v.NumField()-1; i++ {
-		if v.Field(i).Len() >= 255 {
-			return fmt.Errorf("field %s must be less than 255 characters", v.Type().Field(i).Name)
+		if len(utf16.Encode([]rune(v.Field(i).String()))) > MaxFieldLength {
+			return newFieldLengthError(v.Type().Field(i).Name)
 		}
 	}
 	ws.HeaderFooter = &xlsxHeaderFooter{

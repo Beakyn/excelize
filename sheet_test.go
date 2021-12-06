@@ -196,6 +196,24 @@ func TestSearchSheet(t *testing.T) {
 	assert.NoError(t, f.SetCellValue("Sheet1", "A1", true))
 	_, err = f.SearchSheet("Sheet1", "")
 	assert.NoError(t, err)
+
+	f = NewFile()
+	f.Sheet.Delete("xl/worksheets/sheet1.xml")
+	f.Pkg.Store("xl/worksheets/sheet1.xml", []byte(`<worksheet><sheetData><row r="A"><c r="2" t="str"><v>A</v></c></row></sheetData></worksheet>`))
+	f.checked = nil
+	result, err = f.SearchSheet("Sheet1", "A")
+	assert.EqualError(t, err, "strconv.Atoi: parsing \"A\": invalid syntax")
+	assert.Equal(t, []string(nil), result)
+
+	f.Pkg.Store("xl/worksheets/sheet1.xml", []byte(`<worksheet><sheetData><row r="2"><c r="A" t="str"><v>A</v></c></row></sheetData></worksheet>`))
+	result, err = f.SearchSheet("Sheet1", "A")
+	assert.EqualError(t, err, "cannot convert cell \"A\" to coordinates: invalid cell name \"A\"")
+	assert.Equal(t, []string(nil), result)
+
+	f.Pkg.Store("xl/worksheets/sheet1.xml", []byte(`<worksheet><sheetData><row r="0"><c r="A1" t="str"><v>A</v></c></row></sheetData></worksheet>`))
+	result, err = f.SearchSheet("Sheet1", "A")
+	assert.EqualError(t, err, "invalid cell coordinates [1, 0]")
+	assert.Equal(t, []string(nil), result)
 }
 
 func TestSetPageLayout(t *testing.T) {
@@ -217,10 +235,18 @@ func TestSetHeaderFooter(t *testing.T) {
 	assert.EqualError(t, f.SetHeaderFooter("SheetN", nil), "sheet SheetN is not exist")
 	// Test set header and footer with illegal setting.
 	assert.EqualError(t, f.SetHeaderFooter("Sheet1", &FormatHeaderFooter{
-		OddHeader: strings.Repeat("c", 256),
-	}), "field OddHeader must be less than 255 characters")
+		OddHeader: strings.Repeat("c", MaxFieldLength+1),
+	}), "field OddHeader must be less or equal than 255 characters")
 
 	assert.NoError(t, f.SetHeaderFooter("Sheet1", nil))
+	text := strings.Repeat("一", MaxFieldLength)
+	assert.NoError(t, f.SetHeaderFooter("Sheet1", &FormatHeaderFooter{
+		OddHeader:   text,
+		OddFooter:   text,
+		EvenHeader:  text,
+		EvenFooter:  text,
+		FirstHeader: text,
+	}))
 	assert.NoError(t, f.SetHeaderFooter("Sheet1", &FormatHeaderFooter{
 		DifferentFirst:   true,
 		DifferentOddEven: true,
@@ -362,6 +388,14 @@ func TestSetActiveSheet(t *testing.T) {
 	f = NewFile()
 	f.SetActiveSheet(-1)
 	assert.Equal(t, f.GetActiveSheetIndex(), 0)
+
+	f = NewFile()
+	f.WorkBook.BookViews = nil
+	idx := f.NewSheet("Sheet2")
+	ws, ok = f.Sheet.Load("xl/worksheets/sheet2.xml")
+	assert.True(t, ok)
+	ws.(*xlsxWorksheet).SheetViews = &xlsxSheetViews{SheetView: []xlsxSheetView{}}
+	f.SetActiveSheet(idx)
 }
 
 func TestSetSheetName(t *testing.T) {
@@ -404,6 +438,11 @@ func TestDeleteSheet(t *testing.T) {
 	f.DeleteSheet("Sheet2")
 	f.DeleteSheet("Sheet1")
 	assert.NoError(t, f.SaveAs(filepath.Join("test", "TestDeleteSheet2.xlsx")))
+}
+
+func TestDeleteAndAdjustDefinedNames(t *testing.T) {
+	deleteAndAdjustDefinedNames(nil, 0)
+	deleteAndAdjustDefinedNames(&xlsxWorkbook{}, 0)
 }
 
 func BenchmarkNewSheet(b *testing.B) {

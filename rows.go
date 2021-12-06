@@ -67,19 +67,29 @@ func (f *File) GetRows(sheet string, opts ...Options) ([][]string, error) {
 
 // Rows defines an iterator to a sheet.
 type Rows struct {
-	err                        error
-	curRow, totalRow, stashRow int
-	rawCellValue               bool
-	sheet                      string
-	f                          *File
-	tempFile                   *os.File
-	decoder                    *xml.Decoder
+	err                         error
+	curRow, totalRows, stashRow int
+	rawCellValue                bool
+	sheet                       string
+	f                           *File
+	tempFile                    *os.File
+	decoder                     *xml.Decoder
+}
+
+// CurrentRow returns the row number that represents the current row.
+func (rows *Rows) CurrentRow() int {
+	return rows.curRow
+}
+
+// TotalRows returns the total rows count in the worksheet.
+func (rows *Rows) TotalRows() int {
+	return rows.totalRows
 }
 
 // Next will return true if find the next row element.
 func (rows *Rows) Next() bool {
 	rows.curRow++
-	return rows.curRow <= rows.totalRow
+	return rows.curRow <= rows.totalRows
 }
 
 // Error will return the error when the error occurs.
@@ -255,7 +265,7 @@ func (f *File) Rows(sheet string) (*Rows, error) {
 						}
 					}
 				}
-				rows.totalRow = row
+				rows.totalRows = row
 			}
 		case xml.EndElement:
 			if xmlElement.Name.Local == "sheetData" {
@@ -764,11 +774,11 @@ func checkRow(ws *xlsxWorksheet) error {
 //
 // For example set style of row 1 on Sheet1:
 //
-//    err = f.SetRowStyle("Sheet1", 1, style)
+//    err = f.SetRowStyle("Sheet1", 1, 1, styleID)
 //
 // Set style of rows 1 to 10 on Sheet1:
 //
-//    err = f.SetRowStyle("Sheet1", 1, 10, style)
+//    err = f.SetRowStyle("Sheet1", 1, 10, styleID)
 //
 func (f *File) SetRowStyle(sheet string, start, end, styleID int) error {
 	if end < start {

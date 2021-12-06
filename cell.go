@@ -225,6 +225,8 @@ func (f *File) setCellTimeFunc(sheet, axis string, value time.Time) error {
 // timestamp.
 func setCellTime(value time.Time) (t string, b string, isNum bool, err error) {
 	var excelTime float64
+	_, offset := value.In(value.Location()).Zone()
+	value = value.Add(time.Duration(offset) * time.Second)
 	excelTime, err = timeToExcelTime(value)
 	if err != nil {
 		return
@@ -354,7 +356,7 @@ func (f *File) SetCellStr(sheet, axis, value string) error {
 // table.
 func (f *File) setCellString(value string) (string, string) {
 	if len(value) > TotalCellChars {
-		value = value[0:TotalCellChars]
+		value = value[:TotalCellChars]
 	}
 	if f.options.DisableSharedStringsTable {
 		t, v, _ := setCellStr(value)
@@ -383,7 +385,7 @@ func (f *File) setSharedString(val string) int {
 // setCellStr provides a function to set string type to cell.
 func setCellStr(value string) (t string, v string, ns xml.Attr) {
 	if len(value) > TotalCellChars {
-		value = value[0:TotalCellChars]
+		value = value[:TotalCellChars]
 	}
 	if len(value) > 0 {
 		prefix, suffix := value[0], value[len(value)-1]
