@@ -101,6 +101,23 @@ func (f *File) AddTable(sheet, hcell, vcell, format string) error {
 	return err
 }
 
+func (f *File) LoadTableID(id int) xlsxTable {
+	tablePath := fmt.Sprintf("xl/tables/table%d.xml", id)
+	tableXML := xlsxTable{}
+	xml.Unmarshal(f.readXML(tablePath), &tableXML)
+	return tableXML
+}
+
+func (f *File) UpdateTableID(id int, newTableXML xlsxTable) error {
+	tablePath := fmt.Sprintf("xl/tables/table%d.xml", id)
+	bytes, err := xml.Marshal(newTableXML)
+	if err != nil {
+		return err
+	}
+	f.saveFileList(tablePath, bytes)
+	return nil
+}
+
 // countTables provides a function to get table files count storage in the
 // folder xl/tables.
 func (f *File) countTables() int {
