@@ -14,6 +14,7 @@ package excelize
 import (
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -101,14 +102,21 @@ func (f *File) AddTable(sheet, hcell, vcell, format string) error {
 	return err
 }
 
-func (f *File) LoadTableID(id int) xlsxTable {
+func (f *File) LoadTableID(id int) *xlsxTable {
+	if !f.validTableID(id) {
+		return nil
+	}
 	tablePath := fmt.Sprintf("xl/tables/table%d.xml", id)
 	tableXML := xlsxTable{}
 	xml.Unmarshal(f.readXML(tablePath), &tableXML)
-	return tableXML
+	return &tableXML
 }
 
-func (f *File) UpdateTableID(id int, newTableXML xlsxTable) error {
+func (f *File) UpdateTableID(id int, newTableXML *xlsxTable) error {
+	if !f.validTableID(id) {
+		msg := fmt.Sprintf("Cannot update table with id %d. Maximum id is %d.\n", id, f.countTables())
+		return errors.New(msg)
+	}
 	tablePath := fmt.Sprintf("xl/tables/table%d.xml", id)
 	bytes, err := xml.Marshal(newTableXML)
 	if err != nil {
@@ -116,6 +124,11 @@ func (f *File) UpdateTableID(id int, newTableXML xlsxTable) error {
 	}
 	f.saveFileList(tablePath, bytes)
 	return nil
+}
+
+func (f *File) validTableID(id int) bool {
+	tableCount := f.countTables()
+	return id >= 1 && id <= tableCount
 }
 
 // countTables provides a function to get table files count storage in the
